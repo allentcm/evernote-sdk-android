@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.evernote.androidsdk">
 
     <uses-permission android:name="android.permission.INTERNET"/>
+    <!-- Need to force usage of Evernote API due to require min API 14 -->
+    <uses-sdk tools:overrideLibrary="net.vrallev.android.task" />
 
     <application>
         <activity android:name="com.evernote.client.android.EvernoteOAuthActivity"/>
