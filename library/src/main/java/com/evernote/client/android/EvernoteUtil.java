@@ -277,12 +277,15 @@ public final class EvernoteUtil {
     public static Intent createAuthorizationIntent(Context context, String authorizationUrl, boolean forceThirdPartyApp) {
         Intent intent;
 
+        /* TODO: need to enable authorization from app
         if (!forceThirdPartyApp && EvernoteInstallStatus.INSTALLED.equals(getEvernoteInstallStatus(context, ACTION_AUTHORIZE))) {
             intent = new Intent(ACTION_AUTHORIZE);
             intent.setPackage(PACKAGE_NAME);
         } else {
             intent = new Intent(context, EvernoteOAuthActivity.class);
-        }
+        }*/
+
+        intent = new Intent(context, EvernoteOAuthActivity.class);
 
         intent.putExtra(EXTRA_AUTHORIZATION_URL, authorizationUrl);
         return intent;

@@ -35,8 +35,6 @@ import android.support.v4.app.FragmentActivity;
 import com.evernote.client.android.asyncclient.EvernoteClientFactory;
 import com.evernote.client.android.helper.Cat;
 import com.evernote.client.android.helper.EvernotePreconditions;
-import com.evernote.client.android.login.EvernoteLoginActivity;
-import com.evernote.client.android.login.EvernoteLoginFragment;
 
 import java.io.File;
 import java.util.Locale;
@@ -150,6 +148,7 @@ public final class EvernoteSession {
     private boolean mSupportAppLinkedNotebooks;
     private boolean mForceAuthenticationInThirdPartyApp;
     private Locale mLocale;
+    private EvernoteOAuthHelper mEvernoteOAuthHelper;
 
     private EvernoteClientFactory.Builder mEvernoteClientFactoryBuilder;
     private ThreadLocal<EvernoteClientFactory> mFactoryThreadLocal;
@@ -248,43 +247,18 @@ public final class EvernoteSession {
     }
 
     /**
-     * Recommended approach to authenticate the user. If the main Evernote app is installed and up to date,
-     * the app is launched and authenticates the user. Otherwise the old OAuth process is launched and
-     * the user needs to enter his credentials.
-     *
-     * <p/>
-     *
-     * Your {@link FragmentActivity} should implement {@link EvernoteLoginFragment.ResultCallback} to receive
-     * the authentication result. Alternatively you can extend {@link EvernoteLoginFragment} and override
-     * {@link EvernoteLoginFragment#onLoginFinished(boolean)}.
-     *
-     * @param activity The {@link FragmentActivity} holding the progress dialog.
-     */
-    public void authenticate(FragmentActivity activity) {
-        authenticate(activity, EvernoteLoginFragment.create(mConsumerKey, mConsumerSecret, mSupportAppLinkedNotebooks, mLocale));
-    }
-
-    /**
-     * @see EvernoteSession#authenticate(FragmentActivity)
-     */
-    public void authenticate(FragmentActivity activity, EvernoteLoginFragment fragment) {
-        fragment.show(activity.getSupportFragmentManager(), EvernoteLoginFragment.TAG);
-    }
-
-    /**
-     * Similar to {@link EvernoteSession#authenticate(FragmentActivity)}, but instead of opening a dialog
-     * this method launches a separate {@link Activity}.
-     *
-     * <p/>
-     *
      * The calling {@code activity} should override {@link Activity#onActivityResult(int, int, android.content.Intent)}. The {@code requestCode}
      * is {@link EvernoteSession#REQUEST_CODE_LOGIN}. The {@code resultCode} is either {@link Activity#RESULT_OK} or
      * {@link Activity#RESULT_CANCELED}.
      *
-     * @param activity The {@link Activity} launching the {@link EvernoteLoginActivity}.
+     * @param activity The {@link Activity} launching the {@link EvernoteOAuthActivity}.
      */
     public void authenticate(Activity activity) {
-        activity.startActivityForResult(EvernoteLoginActivity.createIntent(activity, mConsumerKey, mConsumerSecret, mSupportAppLinkedNotebooks, mLocale), REQUEST_CODE_LOGIN);
+        activity.startActivityForResult(mEvernoteOAuthHelper.startAuthorization(activity), REQUEST_CODE_LOGIN);
+    }
+
+    public void finishAuthorization(Activity activity, int resultCode, Intent data) {
+        mEvernoteOAuthHelper.finishAuthorization(activity, resultCode, data);
     }
 
     /**
@@ -522,6 +496,12 @@ public final class EvernoteSession {
             session.mClientFactory = new ClientFactory(mUserAgent, mMessageCacheDir);
             session.mEvernoteService = mEvernoteService;
             session.mForceAuthenticationInThirdPartyApp = mForceAuthenticationInThirdPartyApp;
+
+            // create oauth helper
+            session.mEvernoteOAuthHelper = new EvernoteOAuthHelper(session, session.mConsumerKey,
+                    session.mConsumerSecret, session.mSupportAppLinkedNotebooks,
+                    session.mLocale);
+
             return session;
         }
     }

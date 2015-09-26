@@ -67,6 +67,6 @@ public class DemoApp extends Application {
                 .build(consumerKey, consumerSecret)
                 .asSingleton();
 
-        registerActivityLifecycleCallbacks(new LoginChecker());
+
     }
 }

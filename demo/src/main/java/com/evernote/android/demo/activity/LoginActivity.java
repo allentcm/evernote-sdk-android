@@ -10,12 +10,15 @@ import android.widget.Button;
 
 import com.evernote.android.demo.R;
 import com.evernote.client.android.EvernoteSession;
-import com.evernote.client.android.login.EvernoteLoginFragment;
+import com.evernote.edam.error.EDAMSystemException;
+import com.evernote.edam.error.EDAMUserException;
+import com.evernote.edam.type.User;
+import com.evernote.thrift.TException;
 
 /**
  * @author rwondratschek
  */
-public class LoginActivity extends AppCompatActivity implements EvernoteLoginFragment.ResultCallback {
+public class LoginActivity extends AppCompatActivity {
 
     public static void launch(Activity activity) {
         activity.startActivity(new Intent(activity, LoginActivity.class));
@@ -45,11 +48,30 @@ public class LoginActivity extends AppCompatActivity implements EvernoteLoginFra
     }
 
     @Override
-    public void onLoginFinished(boolean successful) {
-        if (successful) {
-            finish();
-        } else {
-            mButton.setEnabled(true);
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode) {
+            case EvernoteSession.REQUEST_CODE_LOGIN:
+                EvernoteSession.getInstance().finishAuthorization(this, resultCode, data);
+                getUserInfo();
+                break;
+
+            default:
+                super.onActivityResult(requestCode, resultCode, data);
+                break;
+        }
+    }
+
+    public void getUserInfo() {
+        try {
+            User user = EvernoteSession.getInstance().getEvernoteClientFactory().getUserStoreClient().getUser();
+            String name = user.getName();
+            String email = user.getEmail();
+        } catch (EDAMUserException e) {
+            e.printStackTrace();
+        } catch (EDAMSystemException e) {
+            e.printStackTrace();
+        } catch (TException e) {
+            e.printStackTrace();
         }
     }
 }
