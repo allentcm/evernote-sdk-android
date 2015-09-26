@@ -257,8 +257,8 @@ public final class EvernoteSession {
         activity.startActivityForResult(mEvernoteOAuthHelper.startAuthorization(activity), REQUEST_CODE_LOGIN);
     }
 
-    public void finishAuthorization(Activity activity, int resultCode, Intent data) {
-        mEvernoteOAuthHelper.finishAuthorization(activity, resultCode, data);
+    public boolean finishAuthorization(Activity activity, int resultCode, Intent data) {
+        return mEvernoteOAuthHelper.finishAuthorization(activity, resultCode, data);
     }
 
     /**
