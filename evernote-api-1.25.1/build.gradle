@@ -1,2 +1,0 @@
-configurations.create("default")
-artifacts.add("default", file('evernote-api-1.25.1.jar'))

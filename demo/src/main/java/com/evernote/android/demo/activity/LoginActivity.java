@@ -2,6 +2,7 @@ package com.evernote.android.demo.activity;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -40,24 +41,48 @@ public class LoginActivity extends AppCompatActivity {
         mButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                EvernoteSession.getInstance().authenticate(LoginActivity.this);
+                new AuthenticationTask().execute();
                 mButton.setEnabled(false);
             }
         });
 
     }
 
+    private class AuthenticationTask extends AsyncTask<Void, Void, Void> {
+        // all task need to be done in separated thread due to use of network task
+        @Override
+        protected Void doInBackground(Void... voids) {
+            EvernoteSession.getInstance().authenticate(LoginActivity.this);
+            return null;
+        }
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         switch (requestCode) {
             case EvernoteSession.REQUEST_CODE_LOGIN:
-                EvernoteSession.getInstance().finishAuthorization(this, resultCode, data);
-                getUserInfo();
+                FinishAuthenticationTask finishTask = new FinishAuthenticationTask();
+                finishTask.data = data;
+                finishTask.resultCode = resultCode;
+                finishTask.execute();
                 break;
 
             default:
                 super.onActivityResult(requestCode, resultCode, data);
                 break;
+        }
+    }
+
+    private class FinishAuthenticationTask extends AsyncTask<Void, Void, Void> {
+        // all task need to be done in separated thread due to use of network task
+        Intent data;
+        int resultCode;
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            if (EvernoteSession.getInstance().finishAuthorization(null, resultCode, data))
+                getUserInfo();
+            return null;
         }
     }
 
