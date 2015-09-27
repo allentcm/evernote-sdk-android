@@ -30,7 +30,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.support.v4.app.FragmentActivity;
 
 import com.evernote.client.android.asyncclient.EvernoteClientFactory;
 import com.evernote.client.android.helper.Cat;
